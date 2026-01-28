@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="oracle-mcp-server" default="dist" basedir=".">
+
+  <property name="src.dir" value="src"/>
+  <property name="lib.dir" value="lib"/>
+  <property name="build.dir" value="build"/>
+  <property name="dist.dir" value="dist"/>
+  <property name="main.class" value="com.example.mcp.Main"/>
+  <property name="jar.name" value="oracle-mcp-server.jar"/>
+
+  <path id="compile.classpath">
+    <fileset dir="${lib.dir}">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+  <target name="clean">
+    <delete dir="${build.dir}"/>
+    <delete dir="${dist.dir}"/>
+  </target>
+
+  <target name="compile">
+    <mkdir dir="${build.dir}"/>
+
+    <!-- Antが古いJavaを拾う事故を避けたいなら fork=true を推奨 -->
+    <javac
+      srcdir="${src.dir}"
+      destdir="${build.dir}"
+      includeantruntime="false"
+      encoding="UTF-8"
+      source="17"
+      target="17"
+      fork="true">
+      <classpath refid="compile.classpath"/>
+    </javac>
+  </target>
+
+  <target name="dist" depends="compile">
+    <mkdir dir="${dist.dir}"/>
+
+    <jar destfile="${dist.dir}/${jar.name}" basedir="${build.dir}">
+      <manifest>
+        <attribute name="Main-Class" value="${main.class}"/>
+      </manifest>
+
+      <!-- 依存jarを展開してfat jar化（署名系は除外） -->
+      <zipgroupfileset dir="${lib.dir}" includes="**/*.jar"
+        excludes="META-INF/*.SF,META-INF/*.DSA,META-INF/*.RSA"/>
+    </jar>
+
+    <echo>Built ${dist.dir}/${jar.name}</echo>
+  </target>
+
+</project>
